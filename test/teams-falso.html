@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><title>Teams falso — Copilot</title>
+<style>body{margin:0;font:14px Arial;background:#f5f5f5}#chat{padding:16px;height:70vh;overflow:auto}.msg{background:#fff;margin:6px 0;padding:8px;border-radius:6px}#caixa{margin:8px 16px;min-height:40px;background:#fff;border:1px solid #ccc;padding:6px}</style></head>
+<body>
+<div id="chat"></div>
+<div id="caixa" role="textbox" contenteditable="true" aria-label="Digite uma mensagem"></div>
+<button aria-label="Enviar" id="enviar" style="margin-left:16px">Enviar</button>
+<script>
+const chat = document.getElementById("chat"), caixa = document.getElementById("caixa");
+const regra = [["boleto","Financeiro"],["fatura","Financeiro"],["senha","Suporte"],["login","Suporte"],["cancel","Cancelamento"]];
+document.getElementById("enviar").addEventListener("click", () => {
+  const texto = caixa.innerText.trim(); if (!texto) return;
+  caixa.innerHTML = "";
+  chat.insertAdjacentHTML("beforeend", `<div class="msg eu"></div>`); chat.lastChild.textContent = texto;
+  window.__perguntas = [...(window.__perguntas || []), texto];
+  const marca = (texto.match(/\[rod bot (\w+)\]/) || [])[1];
+  const msgs = texto.split("Mensagens do cliente:")[1] || texto;
+  const pasta = (regra.find(([p]) => msgs.toLowerCase().includes(p)) || [, "Suporte"])[1];
+  const json = JSON.stringify({ id: marca, pasta: pasta.toUpperCase(), palavrasChave: ["segunda via", "boleto"] });
+  const r = document.createElement("div"); r.className = "msg copilot"; chat.append(r);
+  // "Streaming": escreve metade, depois o resto.
+  setTimeout(() => (r.textContent = "Claro! " + json.slice(0, 20)), 500);
+  setTimeout(() => (r.textContent = "Claro! " + json), 1100);
+});
+</script>
+</body></html>

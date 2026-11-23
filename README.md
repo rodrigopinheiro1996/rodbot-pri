@@ -23,6 +23,26 @@ Durante esse tempo, `Esc` pula, `1`–`9` troca a pasta e `Espaço` pausa.
 - Envios automáticos **não** alimentam o aprendizado (só decisões suas reforçam o modelo),
   para o bot não se autoconvencer de erros.
 
+## Ponte com o Copilot do Teams (opcional)
+
+Userscript em `ponte/rodbot-ponte-teams.user.js`. Não precisa de Node.js.
+Funciona no **Edge** ou no Chrome, desde que o Blip e o Teams estejam no **mesmo navegador e perfil**.
+
+1. Instale o Tampermonkey (no Edge: loja Edge Add-ons). Em `edge://extensions`, ligue
+   **Modo de desenvolvedor**; nos detalhes do Tampermonkey, ligue **Permitir scripts de usuário**, se aparecer.
+2. No Tampermonkey: *Criar novo script* → cole o conteúdo de `ponte/rodbot-ponte-teams.user.js` → salvar.
+3. Abra o Teams na web (`teams.microsoft.com` ou `teams.cloud.microsoft`), de preferência em uma
+   **janela separada** do Edge, e abra o chat com o Copilot.
+4. Clique no selo **rb** no canto inferior esquerdo → "Ponte ativa neste chat".
+   (Precisa clicar de novo se recarregar a aba do Teams.)
+5. No Blip, abra o rod bot → Ajustes → ligue **Copilot do Teams** e escolha em **Consultar o Copilot abaixo de** a confiança (%) abaixo da qual o Copilot é consultado.
+
+Quando a confiança local é baixa, a ponte escreve a pergunta no chat do Copilot, lê o JSON da resposta
+e mostra a pasta no painel. Você confirma com o botão **Mover para…**.
+
+Se o Teams mudar o layout e a ponte parar de digitar ou enviar, ajuste `seletorCaixa` / `seletorEnviar`
+no topo do script.
+
 ## Desenvolvimento
 
 O código legível está em `src/rodbot-copiloto.js`; a página de instalação em `src/instalar.html`.
@@ -31,4 +51,5 @@ O código legível está em `src/rodbot-copiloto.js`; a página de instalação 
 npm install
 npm run build          # gera rodbot-pri.html
 node test/painel.mjs   # teste no Blip falso (precisa do Playwright)
+node test/ponte.mjs    # teste da ponte: Blip falso + Teams falso
 ```

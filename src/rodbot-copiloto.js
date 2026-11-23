@@ -544,6 +544,7 @@
     limiarProb: 0.6,
     limiarMargem: 0.2,
     copilotTeams: !1,
+    teamsConfianca: 0.6,
     pesos: { motivo: 3, cliente: 1, anteriores: 0.5 },
     pseudoContagem: 5,
     alfa: 1,
@@ -568,6 +569,9 @@
       autoConfianca: Number.isFinite(Number(o.autoConfianca))
         ? Math.min(0.99, Math.max(0.5, Number(o.autoConfianca)))
         : Q.autoConfianca,
+      teamsConfianca: Number.isFinite(Number(o.teamsConfianca))
+        ? Math.min(0.99, Math.max(0.3, Number(o.teamsConfianca)))
+        : Q.teamsConfianca,
       autoAtrasoMs: Number.isFinite(Number(o.autoAtrasoMs))
         ? Math.min(1e4, Math.max(0, Number(o.autoAtrasoMs)))
         : Q.autoAtrasoMs,
@@ -1553,7 +1557,7 @@
               t(
                 "p",
                 {},
-                "Na confiança baixa, envia motivo e mensagens do cliente com mascaramento ao Teams corporativo. Ative apenas para uso autorizado.",
+                "Quando a confiança fica baixa, envia motivo e mensagens do cliente com mascaramento ao Teams corporativo. Ative apenas para uso autorizado.",
               ),
             ),
             sw(
@@ -1562,6 +1566,25 @@
               "Consultar o Copilot do Teams",
             ),
           ),
+          c.copilotTeams
+            ? [
+                faixa(
+                  "Consultar o Copilot abaixo de",
+                  "teamsConfianca",
+                  c.teamsConfianca,
+                  30,
+                  99,
+                  (v) => salvar({ teamsConfianca: v }),
+                ),
+                t(
+                  "div",
+                  { class: "rf-nota" },
+                  c.autoEnviar && c.teamsConfianca > c.autoConfianca
+                    ? `Acima de ${U(c.autoConfianca)} o envio automático tem prioridade e o Teams não é consultado.`
+                    : "Abaixo desse valor, o painel mostra a sugestão do Copilot. Acima, vale só o aprendizado local.",
+                ),
+              ]
+            : null,
         ),
         t(
           "div",
@@ -1975,7 +1998,10 @@
                 R({ pasta: p.sugestao, acao: "automatico", fonte: "auto" });
             }, E.autoAtrasoMs)
           : null;
-      if (!p.sugestao && E.copilotTeams === !0)
+      // Copilot do Teams: consulta quando a confiança fica abaixo do limite escolhido.
+      let consultarTeams =
+        E.copilotTeams === !0 && !auto && (w == null || w < E.teamsConfianca);
+      if (consultarTeams)
         try {
           K =
             s?.consultar({
@@ -2002,8 +2028,7 @@
                 sugestaoTeams: k.sugestaoTeams,
               }));
           }))
-        : !p.sugestao &&
-          E.copilotTeams === !0 &&
+        : consultarTeams &&
           a.mostrarTriagem({ ...q, teams: "indisponivel" });
       let L = await D;
       if ((clearTimeout(autoTimer), K && K.cancelar(), d === k && (d = null), L.cancelado || !y()))
