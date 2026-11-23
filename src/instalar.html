@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rod bot copiloto</title>
+<style>
+:root{--bg:#0c0f13;--card:#14181e;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--tx:#f1f5f9;--mu:#8c97a9;--ac:#89f336;--on:#0a0f08;--acd:rgba(137,243,54,.12);--acb:rgba(137,243,54,.34)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;background:radial-gradient(circle at 50% -10%,rgba(137,243,54,.08),transparent 55%),var(--bg);color:var(--tx);font:15px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.c{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:32px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7)}
+.topo{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.marca{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--acd);border:1px solid var(--acb);color:var(--ac);font-weight:800;font-size:15px;letter-spacing:-.04em}
+h1{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.v{font-size:12px;color:var(--mu)}
+.lead{color:var(--mu);margin-bottom:20px}
+.alvo{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px;border:1px dashed var(--line2);border-radius:16px;background:rgba(255,255,255,.02);margin-bottom:26px;text-align:center}
+.bm{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:12px;background:var(--ac);color:var(--on);font-weight:700;text-decoration:none;cursor:grab;box-shadow:0 8px 24px -8px rgba(137,243,54,.5)}
+.bm:active{cursor:grabbing}
+.dica{font-size:12.5px;color:var(--mu)}
+ol{list-style:none;counter-reset:p;display:grid;gap:14px}
+li{counter-increment:p;display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start}
+li::before{content:counter(p);width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--mu)}
+li b{font-weight:600}
+kbd{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 5px;border-radius:6px;border:1px solid var(--line2);background:rgba(255,255,255,.04);font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.novo{margin-top:24px;padding:14px 16px;border-radius:14px;background:var(--acd);border:1px solid var(--acb);font-size:13.5px}
+.novo b{color:var(--ac)}
+.mu{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);color:var(--mu);font-size:12.5px}
+@media (max-width:480px){.c{padding:24px 18px}}
+</style>
+</head>
+<body>
+<main class="c">
+<div class="topo">
+<div class="marca" aria-hidden="true">rb</div>
+<div><h1>rod bot copiloto</h1><div class="v">versão {{VERSAO}}</div></div>
+</div>
+<p class="lead">Sugere a pasta certa para cada atendimento do Blip e move o ticket com um toque.</p>
+<div class="alvo">
+<a class="bm" href="{{BOOKMARKLET}}">rod bot copiloto</a>
+<div class="dica">Arraste este botão para a barra de favoritos</div>
+</div>
+<ol>
+<li><span>Abra o desk do Blip com a lista de atendimentos e clique no favorito <b>rod bot copiloto</b>.</span></li>
+<li><span>Em <b>Pastas</b>, cadastre o nome exato de cada pasta e as palavras-chave. Clique em <b>Conferir com o Blip</b>.</span></li>
+<li><span>Clique em <b>Iniciar triagem</b>. <kbd>Enter</kbd> confirma, <kbd>1</kbd>–<kbd>9</kbd> escolhem outra pasta, <kbd>Esc</kbd> pula, <kbd>Espaço</kbd> pausa.</span></li>
+</ol>
+<div class="novo"><b>Envio automático (opcional).</b> Em <b>Ajustes</b>, ligue o envio automático e escolha a confiança mínima. Acima dela, o ticket vai para a pasta sozinho, sem Enter.</div>
+<p class="mu">A triagem roda no seu navegador. Se ativada em Ajustes, a ponte opcional envia contexto mascarado ao Copilot do Teams nos casos de baixa confiança.</p>
+</main>
+</body>
+</html>

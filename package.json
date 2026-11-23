@@ -1,0 +1,12 @@
+{
+  "name": "rodbot-pri",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}

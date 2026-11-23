@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><title>Blip falso</title>
+<style>body{margin:0;font:14px Arial;display:flex;height:100vh;background:#f4f6f8;color:#222}#lista{width:260px;border-right:1px solid #ddd;overflow:auto;background:#fff}article{padding:12px;border-bottom:1px solid #eee;cursor:pointer;position:relative}bds-menu{display:none}bds-menu[open]{display:block;position:absolute;right:8px;top:30px;background:#fff;border:1px solid #ccc;z-index:5;padding:4px}#pane-chat-div{flex:1;padding:16px}.bubble{background:#fff;border-radius:8px;padding:8px;margin:6px 0;max-width:60%}#text-input{border:1px solid #ccc;min-height:30px;background:#fff;margin-top:12px}</style></head>
+<body>
+<div id="lista"></div>
+<div id="pane-chat-div"><div id="ticket-sequential-id"></div><div data-testid="message-list-segments"></div><div id="resumo"></div><div id="text-input" contenteditable="true"></div></div>
+<script>
+const tickets = {
+  101: ["Não consigo pagar o boleto da fatura, o pagamento deu erro"],
+  102: ["Esqueci minha senha e não consigo fazer login no acesso"],
+  103: ["Quero cancelar minha assinatura, pedido de cancelamento"],
+  104: ["A fatura veio errada, o boleto está com valor alto no pagamento"],
+  105: ["Meu login não funciona, preciso de acesso com nova senha"],
+};
+const pastas = ["Financeiro", "Suporte", "Cancelamento"];
+const lista = document.getElementById("lista");
+for (const id of Object.keys(tickets)) {
+  const a = document.createElement("article");
+  a.className = "chat-list-item";
+  a.innerHTML = `<span>Ticket #${id}</span><div class="ticket-menu"><button class="ticket-info-options" id="menu-${id}">⋮</button><bds-menu><bds-menu-action button-text="Mover para"></bds-menu-action><div class="folder-submenu-container">${pastas.map(p => `<div class="custom-submenu-item"><span class="sub-menu">${p}</span></div>`).join("")}</div></bds-menu></div>`;
+  a.addEventListener("click", (ev) => {
+    const menu = a.querySelector("bds-menu");
+    if (ev.target.closest(".ticket-info-options")) { menu.toggleAttribute("open"); return; }
+    const item = ev.target.closest(".custom-submenu-item");
+    if (item) { window.__movidos = [...(window.__movidos || []), [id, item.textContent]]; a.remove(); return; }
+    if (ev.target.closest("bds-menu")) return;
+    abrir(id);
+  });
+  lista.append(a);
+}
+function abrir(id) {
+  document.getElementById("ticket-sequential-id").textContent = "#" + id;
+  const seg = document.querySelector('[data-testid="message-list-segments"]');
+  seg.innerHTML = `<div class="blip-message-group"><div class="blip-container ticket">Ticket #${id}</div></div>` +
+    tickets[id].map(t => `<div class="blip-message-group"><div class="blip-card-group left"><div class="bubble"><div class="plain-text">${t}</div></div></div></div>`).join("");
+}
+</script>
+</body></html>
