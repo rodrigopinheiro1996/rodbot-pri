@@ -38,6 +38,19 @@ await teams.click("#rf-ponte-selo");
 ok((await teams.textContent("#rf-ponte-selo")).includes("Ponte ativa"), "teams: selo marca este chat como ativo");
 if (saida) await teams.locator("#rf-ponte-selo").screenshot({ path: `${saida}/ponte-selo.png` });
 
+// Sem ponte no Blip: o painel avisa que o userscript não está rodando.
+const semPonte = await ctx.newPage();
+await semPonte.goto(base + "blip-falso.html");
+await semPonte.evaluate(() => {
+  localStorage.setItem("rf_copiloto_pastas", JSON.stringify([{ nome: "Financeiro", palavras: ["xyz"] }, { nome: "Suporte", palavras: ["abc"] }]));
+  localStorage.setItem("rf_copiloto_config", JSON.stringify({ copilotTeams: true, teamsConfianca: 0.9 }));
+});
+await semPonte.evaluate(codigo);
+await semPonte.click("#rf-copiloto-panel .rf-cta");
+await semPonte.waitForSelector("#rf-copiloto-panel .rf-acoes", { timeout: 8000 });
+ok((await semPonte.textContent("#rf-copiloto-panel .rf-corpo")).includes("a ponte não está rodando nesta aba"), "diagnóstico: sem userscript no Blip");
+await semPonte.close();
+
 const blip = await ctx.newPage();
 blip.on("pageerror", erro);
 await blip.goto(base + "blip-falso.html");
@@ -55,6 +68,10 @@ await blip.evaluate(ponte);
 await blip.evaluate(codigo);
 await blip.waitForFunction(() => document.querySelector("#rf-copiloto-panel")?.dataset.teamsPulso, null, { timeout: 8000 });
 ok(true, "blip: pulso da ponte chega ao painel");
+await blip.click('#rf-copiloto-panel [data-aba="Ajustes"]');
+await blip.waitForFunction(() => document.querySelector("#rf-copiloto-panel .rf-ponte")?.dataset.estado === "ok", null, { timeout: 5000 });
+ok(true, "ajustes: mostra 'Ponte conectada ao Teams'");
+await blip.click('#rf-copiloto-panel [data-aba="Triagem"]');
 
 await blip.click("#rf-copiloto-panel .rf-cta");
 await blip.waitForSelector("text=Copilot do Teams", { timeout: 8000 });

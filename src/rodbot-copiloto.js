@@ -817,6 +817,11 @@
 #P .rf-hist:last-of-type{border-bottom:0}
 #P .rf-hist span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #P .rf-hist em{font-style:normal;text-align:right;color:var(--mu);font-size:11.5px;font-variant-numeric:tabular-nums}
+#P .rf-ponte{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--erd);color:var(--er);font-size:12px}
+#P .rf-ponte::before{content:"";width:6px;height:6px;margin-top:6px;flex:none;border-radius:50%;background:currentColor}
+#P .rf-ponte[data-estado="ok"]{background:var(--acd);color:var(--ac)}
+#P .rf-ponte[data-estado="sem_teams"]{background:var(--wnd);color:var(--wn)}
+#P .rf-aviso b{font-weight:700}
 @keyframes rf-giro{to{transform:rotate(360deg)}}
 @keyframes rf-pulso{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes rf-encher{from{width:0}to{width:100%}}
@@ -947,6 +952,7 @@
             ? `Auto ≥ ${U(cfg.autoConfianca)}`
             : "Parado";
     }
+    let ponteLinha = t("div", { class: "rf-ponte", role: "status" });
     let P = "Triagem";
     function A(c) {
       (P = c),
@@ -1009,6 +1015,15 @@
           t("span", {}, texto),
           extra ? t("em", {}, extra) : null,
         );
+    let avisoTeams = {
+      sem_ponte:
+        "a ponte não está rodando nesta aba do Blip. Confira se o script está ativo no Tampermonkey e recarregue a página do Blip.",
+      sem_teams:
+        'o Teams não respondeu. Abra o chat do Copilot no Teams (mesmo navegador) e clique no selo rb até aparecer "Ponte ativa neste chat".',
+      sem_texto: "sem motivo nem mensagens do cliente para enviar.",
+      sem_resposta: "não respondeu a tempo. Escolha a pasta abaixo.",
+      indisponivel: "sem sugestão. Escolha a pasta abaixo.",
+    };
     function l(c) {
       (modoAtual = c.modo), atualizarTopo();
       ["carregando", "sugestao", "escolha"].includes(c.modo) &&
@@ -1120,12 +1135,13 @@
                 "Consultando o Copilot do Teams…",
               ),
             ),
-          c.teams === "indisponivel" &&
+          avisoTeams[c.teams] &&
             i.push(
               t(
                 "div",
-                { class: "rf-mu", role: "status", style: "margin-top:10px" },
-                "Sem sugestão do Teams. Escolha a pasta abaixo.",
+                { class: "rf-aviso", role: "status" },
+                t("b", {}, "Copilot do Teams: "),
+                avisoTeams[c.teams],
               ),
             ),
           c.teams === "sugeriu")
@@ -1479,6 +1495,7 @@
           (v) => salvar({ autoConfianca: v }),
         );
       c.autoEnviar || autoFaixa.classList.add("off");
+      atualizarPonte();
       let w = t("input", {
         type: "file",
         accept: "application/json",
@@ -1568,6 +1585,7 @@
           ),
           c.copilotTeams
             ? [
+                ponteLinha,
                 faixa(
                   "Consultar o Copilot abaixo de",
                   "teamsConfianca",
@@ -1622,6 +1640,17 @@
         ),
       );
     }
+    function atualizarPonte() {
+      let g0 = ponteEstado(h);
+      ponteLinha.dataset.estado = g0;
+      ponteLinha.textContent =
+        g0 === "ok"
+          ? "Ponte conectada ao Teams"
+          : g0 === "sem_teams"
+            ? "Ponte ativa no Blip, aguardando o Teams (clique no selo rb no chat do Copilot)"
+            : "Ponte não detectada nesta aba (instale/ative o userscript e recarregue)";
+    }
+    let relogioPonte = setInterval(atualizarPonte, 1500);
     function T(c, S = "") {
       (n.textContent = c), (n.className = `rf-status ${S}`);
     }
@@ -1636,7 +1665,8 @@
       s.scrollTop = s.scrollHeight;
     }
     function V() {
-      e.removeEventListener("mousemove", C),
+      clearInterval(relogioPonte),
+        e.removeEventListener("mousemove", C),
         e.removeEventListener("mouseup", M),
         h.remove(),
         a.remove();
@@ -2024,12 +2054,18 @@
                 R && o.pastas().some((ne) => ne.nome === R.pasta) ? R : null),
               a.mostrarTriagem({
                 ...q,
-                teams: k.sugestaoTeams ? "sugeriu" : "indisponivel",
+                teams: k.sugestaoTeams ? "sugeriu" : "sem_resposta",
                 sugestaoTeams: k.sugestaoTeams,
               }));
           }))
         : consultarTeams &&
-          a.mostrarTriagem({ ...q, teams: "indisponivel" });
+          a.mostrarTriagem({
+            ...q,
+            teams: (() => {
+              let g0 = s?.diagnostico?.() || "sem_ponte";
+              return g0 === "ok" ? "sem_texto" : g0;
+            })(),
+          });
       let L = await D;
       if ((clearTimeout(autoTimer), K && K.cancelar(), d === k && (d = null), L.cancelado || !y()))
         return;
@@ -2154,8 +2190,15 @@
       .trim()
       .slice(0, 600);
   }
+  // Estado da ponte (userscript): sem_ponte | sem_teams | ok
+  function ponteEstado(o) {
+    let u = o.dataset,
+      m = Number(u.teamsPulso);
+    return u.teamsPonte ? (m && Date.now() - m <= Te ? "ok" : "sem_teams") : "sem_ponte";
+  }
   function oe(e, o, t) {
     return {
+      diagnostico: () => ponteEstado(o),
       consultar({ ticket: a, pastas: r, motivo: n, mensagens: s }) {
         let u = o.dataset,
           f = Date.now(),

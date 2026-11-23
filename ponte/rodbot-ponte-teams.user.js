@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         rod bot — ponte Copilot do Teams
 // @namespace    rodbot-pri
-// @version      0.1.0
+// @version      0.2.0
 // @description  Liga o rod bot copiloto (Blip) ao Copilot do Teams aberto em outra aba do mesmo navegador (Edge ou Chrome).
 // @match        https://*.desk.blip.ai/*
 // @match        https://teams.microsoft.com/*
@@ -86,6 +86,7 @@
       api.gravar(K.ping, Date.now());
       const painel = document.querySelector(PAINEL);
       if (!painel) return;
+      painel.dataset.teamsPonte = "0.2.0"; // avisa o painel que a ponte está instalada nesta aba
       if (Date.now() - ultimoPong < CONFIG.vivoAteMs) painel.dataset.teamsPulso = String(Date.now());
     }, CONFIG.pulsoMs);
 
@@ -125,10 +126,13 @@
       "cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)";
     const desenhar = () => {
       const ativo = souAlvo();
+      const semCaixa = ativo && !acharCaixa();
       selo.innerHTML =
         `<span style="width:22px;height:22px;border-radius:7px;display:grid;place-items:center;` +
         `background:rgba(137,243,54,.12);border:1px solid rgba(137,243,54,.34);color:#89f336;font-weight:800;font-size:10px">rb</span>` +
-        (ativo
+        (semCaixa
+          ? `<span><span style="color:#fbbf24">●</span> Ponte ativa — abra o chat do Copilot</span>`
+          : ativo
           ? `<span><span style="color:#89f336">●</span> Ponte ativa neste chat</span>`
           : `<span style="color:#8c97a9">Usar este chat para o rod bot</span>`);
       selo.title = ativo
@@ -139,9 +143,11 @@
       api.gravar(K.alvo, souAlvo() ? null : meuId);
       desenhar();
     });
-    // Só mostra o selo onde existe uma caixa de digitação (evita selos em iframes vazios).
+    // Na janela principal o selo aparece sempre; em iframes, só onde há caixa de digitação.
+    const principal = window.top === window;
     const mostrarSelo = () => {
-      if (!selo.isConnected && acharCaixa()) document.body.appendChild(selo), desenhar();
+      if (!selo.isConnected && document.body && (principal || acharCaixa())) document.body.appendChild(selo);
+      if (selo.isConnected) desenhar();
     };
     setInterval(mostrarSelo, 1500);
     api.ouvir(K.alvo, desenhar);
