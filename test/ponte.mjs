@@ -48,7 +48,7 @@ await blip.evaluate(() => {
     { nome: "Cancelamento", palavras: ["assinatura"] },
   ]));
   // Confiança mínima alta: o rod bot não sugere sozinho e pergunta ao Teams.
-  localStorage.setItem("rf_copiloto_config", JSON.stringify({ limiarProb: 0.999, limiarMargem: 0.5, copilotTeams: true }));
+  localStorage.setItem("rf_copiloto_config", JSON.stringify({ limiarProb: 0.999, limiarMargem: 0.5, copilotTeams: true, teamsConfianca: 0.9 }));
 });
 await blip.evaluate(shim("blip"));
 await blip.evaluate(ponte);
@@ -67,6 +67,27 @@ if (saida) await blip.locator("#rf-copiloto-panel").screenshot({ path: `${saida}
 await blip.click('#rf-copiloto-panel .rf-caixa button.rf-bt');
 await blip.waitForFunction(() => (window.__movidos || []).length === 1, null, { timeout: 8000 });
 ok((await blip.evaluate(() => window.__movidos[0][1])) === "Financeiro", "blip: ticket movido para a pasta do Copilot");
+
+// Limite abaixo da confiança do ticket (75%): o Teams não é consultado.
+await blip.close(); // para o laço da primeira aba
+const blip2 = await ctx.newPage();
+blip2.on("pageerror", erro);
+await blip2.goto(base + "blip-falso.html");
+await blip2.evaluate(() => localStorage.setItem("rf_copiloto_config", JSON.stringify({ limiarProb: 0.999, limiarMargem: 0.5, copilotTeams: true, teamsConfianca: 0.5 })));
+await blip2.evaluate(shim("blip"));
+await blip2.evaluate(ponte);
+await blip2.evaluate(codigo);
+await blip2.waitForFunction(() => document.querySelector("#rf-copiloto-panel")?.dataset.teamsPulso, null, { timeout: 8000 });
+const antes = (await teams.evaluate(() => window.__perguntas)).length;
+await blip2.click("#rf-copiloto-panel .rf-cta");
+await blip2.waitForSelector("#rf-copiloto-panel .rf-acoes", { timeout: 8000 });
+await blip2.waitForTimeout(2500);
+ok((await teams.evaluate(() => window.__perguntas)).length === antes, "blip: confiança acima do limite do Teams não consulta o Copilot");
+await blip2.keyboard.press(" ");
+await blip2.click('#rf-copiloto-panel [data-aba="Ajustes"]');
+await blip2.evaluate(() => document.querySelector("#rf-copiloto-panel input[name=teamsConfianca]").scrollIntoView({ block: "center" }));
+if (saida) await blip2.locator("#rf-copiloto-panel").screenshot({ path: `${saida}/ajustes-teams.png` });
+ok(await blip2.isVisible('#rf-copiloto-panel input[name="teamsConfianca"]'), "ajustes: barra de % do Teams aparece com a chave ligada");
 
 await browser.close();
 servidor.close();

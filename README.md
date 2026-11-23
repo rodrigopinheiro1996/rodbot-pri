@@ -35,7 +35,7 @@ Funciona no **Edge** ou no Chrome, desde que o Blip e o Teams estejam no **mesmo
    **janela separada** do Edge, e abra o chat com o Copilot.
 4. Clique no selo **rb** no canto inferior esquerdo → "Ponte ativa neste chat".
    (Precisa clicar de novo se recarregar a aba do Teams.)
-5. No Blip, abra o rod bot → Ajustes → ligue **Copilot do Teams**.
+5. No Blip, abra o rod bot → Ajustes → ligue **Copilot do Teams** e escolha em **Consultar o Copilot abaixo de** a confiança (%) abaixo da qual o Copilot é consultado.
 
 Quando a confiança local é baixa, a ponte escreve a pergunta no chat do Copilot, lê o JSON da resposta
 e mostra a pasta no painel. Você confirma com o botão **Mover para…**.
